@@ -1,6 +1,5 @@
 import { execFileSync } from "node:child_process";
 import { copyFileSync, cpSync, mkdirSync } from "node:fs";
-import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnvFile } from "node:process";
@@ -19,7 +18,7 @@ execFileSync("codesign", ["--force", "--sign", "-", "--identifier", "local.josh.
 execFileSync(binary, ["--self-test"], { stdio: "inherit" });
 console.log(`Built ${app}`);
 if (process.argv.includes("--install")) {
-  const installed = join(homedir(), "Applications", "Couch Remote.app");
+  const installed = "/Applications/Couch Remote.app";
   cpSync(app, installed, { recursive: true, force: true });
   console.log(`Installed ${installed}`);
 }

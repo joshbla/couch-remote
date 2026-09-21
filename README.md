@@ -27,6 +27,6 @@ System volume controls behave like the Mac’s own volume keys. Some HDMI televi
 
 ## Build
 
-Requires the Apple command-line developer tools and Node with TypeScript support. Run `node build.ts` from this directory. The build reads `.env.local`, compiles the native Swift app, generates its icon, signs it locally, and runs the non-interactive core checks. The result is `build/Couch Remote.app`.
+Requires the Apple command-line developer tools and Node with TypeScript support. Run `node build.ts` from this directory. The build reads `.env.local`, compiles the native Swift app, generates its icon, signs it locally, and runs the non-interactive core checks. The result is `build/Couch Remote.app`; `node build.ts --install` installs it in the main `/Applications` folder.
 
 Native AppKit and GameController APIs provide background controller input, a normal menu-bar app, and macOS mouse/keyboard events without a browser or a running terminal. The app uses only the connected 8BitDo controller and does not require network access. It uses the sticks, not motion aiming; macOS does not expose motion sensors for this controller connection.
