@@ -1,7 +1,7 @@
 import AppKit
 
 enum RemoteAction: String, CaseIterable {
-    case leftClick, rightClick, space, enter, escape, g, h, a, d, volumeUp, volumeDown
+    case leftClick, rightClick, space, enter, escape, fn, g, h, a, d, volumeUp, volumeDown
     case precision, pause, none, tab, backspace, leftArrow, rightArrow, upArrow, downArrow, f, m
 
     var title: String {
@@ -11,6 +11,7 @@ enum RemoteAction: String, CaseIterable {
         case .space: return "Space"
         case .enter: return "Return / Enter"
         case .escape: return "Escape"
+        case .fn: return "Fn / Globe"
         case .g: return "G"
         case .h: return "H"
         case .a: return "A"
@@ -36,6 +37,7 @@ enum RemoteAction: String, CaseIterable {
         case .space: return 49
         case .enter: return 36
         case .escape: return 53
+        case .fn: return 63
         case .g: return 5
         case .h: return 4
         case .a: return 0
@@ -72,12 +74,13 @@ let bindings: [Binding] = [
     Binding(input: "b", title: "B · right face button", initial: .rightClick),
     Binding(input: "x", title: "X · left face button", initial: .space),
     Binding(input: "y", title: "Y · top face button", initial: .enter),
-    Binding(input: "lb", title: "LB · left shoulder", initial: .g),
-    Binding(input: "rb", title: "RB · right shoulder", initial: .h),
+    Binding(input: "lb", title: "LB · left shoulder", initial: .a),
+    Binding(input: "rb", title: "RB · right shoulder", initial: .d),
     Binding(input: "up", title: "D-pad up", initial: .volumeUp),
     Binding(input: "down", title: "D-pad down", initial: .volumeDown),
-    Binding(input: "left", title: "D-pad left", initial: .a),
-    Binding(input: "right", title: "D-pad right", initial: .d),
+    Binding(input: "left", title: "D-pad left", initial: .g),
+    Binding(input: "right", title: "D-pad right", initial: .h),
+    Binding(input: "leftStick", title: "Press left stick", initial: .fn),
     Binding(input: "lt", title: "LT · left trigger", initial: .precision),
     Binding(input: "rt", title: "RT · right trigger", initial: .leftClick),
     Binding(input: "options", title: "Select / View", initial: .escape),
@@ -130,6 +133,9 @@ func runSelfTests() {
     precondition(state.update([]).released == [.leftClick])
     precondition(!RemoteAction.space.repeats && RemoteAction.volumeUp.repeats)
     precondition(Set(bindings.map(\.input)).count == bindings.count)
+    precondition(bindings.first(where: { $0.input == "leftStick" })?.initial == .fn)
+    precondition(bindings.first(where: { $0.input == "lb" })?.initial == .a)
+    precondition(bindings.first(where: { $0.input == "left" })?.initial == .g)
     for action in RemoteAction.allCases {
         if let keyCode = action.keyCode {
             precondition(CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) != nil)

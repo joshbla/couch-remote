@@ -12,9 +12,10 @@ Open **Couch Remote** from Applications or Spotlight. On first launch, enable it
 | B (right face button) | Right click |
 | X (left face button) | Space |
 | Y (top face button) | Return |
-| LB / RB | G / H |
+| LB / RB | A / D |
 | D-pad up / down | System volume up / down |
-| D-pad left / right | A / D |
+| D-pad left / right | G / H |
+| Press left stick | Fn / Globe key |
 | LT | Hold for slow, precise pointer movement |
 | RT | Left click; hold to drag |
 | Select / View | Escape |
@@ -22,7 +23,7 @@ Open **Couch Remote** from Applications or Spotlight. On first launch, enable it
 
 Button assignments and pointer speed can be changed in the controls window and are saved automatically. “Open automatically when I log in” is optional. A disconnected controller reconnects automatically while the app is open. Quit from the menu-bar icon to stop it entirely.
 
-System volume controls behave like the Mac’s own volume keys. Some HDMI televisions manage volume only on the TV; the G/H assignments still send those keys to your active app.
+System volume controls behave like the Mac’s own volume keys. Some HDMI televisions manage volume only on the TV; the G/H assignments still send those keys to your active app. The Fn action follows the behavior selected for the Globe key in macOS Keyboard settings.
 
 ## Build
 

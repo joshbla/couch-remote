@@ -195,6 +195,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
             ("menu", pad.buttonMenu),
         ]
         if let options = pad.buttonOptions { result.append(("options", options)) }
+        if let leftThumbstickButton = pad.leftThumbstickButton { result.append(("leftStick", leftThumbstickButton)) }
         return result
     }
 
@@ -274,7 +275,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func send(_ action: RemoteAction, down: Bool, repeating: Bool = false) {
         if let key = action.keyCode {
             let event = CGEvent(keyboardEventSource: eventSource, virtualKey: key, keyDown: down)
-            event?.flags = []
+            event?.flags = action == .fn && down ? .maskSecondaryFn : []
             event?.setIntegerValueField(.keyboardEventAutorepeat, value: repeating ? 1 : 0)
             event?.post(tap: .cghidEventTap)
         } else if action == .leftClick || action == .rightClick {

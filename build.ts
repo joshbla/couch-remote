@@ -20,6 +20,6 @@ execFileSync(binary, ["--self-test"], { stdio: "inherit" });
 console.log(`Built ${app}`);
 if (process.argv.includes("--install")) {
   const installed = join(homedir(), "Applications", "Couch Remote.app");
-  cpSync(app, installed, { recursive: true, force: false, errorOnExist: true });
+  cpSync(app, installed, { recursive: true, force: true });
   console.log(`Installed ${installed}`);
 }
