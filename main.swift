@@ -16,6 +16,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var timer: Timer?
     private var activityToken: NSObjectProtocol?
     private var actions = ActionState()
+    private var commandHeld = false
     private var nextRepeat: [RemoteAction: TimeInterval] = [:]
     private var mappings: [String: RemoteAction] = [:]
     private var popups: [NSPopUpButton] = []
@@ -116,7 +117,8 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         separator.boxType = .separator
         stack.addArrangedSubview(separator)
         stack.addArrangedSubview(label("Left stick: move pointer     ·     Right stick: scroll", size: 14, weight: .semibold))
-        stack.addArrangedSubview(label("Hold LT for precision. Hold A or RT while moving to drag."))
+        stack.addArrangedSubview(label("Hold LT for precision. Hold A while moving to drag."))
+        stack.addArrangedSubview(label("Hold left stick click, then click right stick to switch apps."))
         let speedRow = NSStackView()
         speedRow.orientation = .horizontal
         speedRow.spacing = 12
@@ -196,6 +198,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         ]
         if let options = pad.buttonOptions { result.append(("options", options)) }
         if let leftThumbstickButton = pad.leftThumbstickButton { result.append(("leftStick", leftThumbstickButton)) }
+        if let rightThumbstickButton = pad.rightThumbstickButton { result.append(("rightStick", rightThumbstickButton)) }
         return result
     }
 
@@ -224,11 +227,13 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard enabled && trusted else { return }
         let active = Set(current.compactMap { mappings[$0] }).subtracting([.pause, .none])
         let changes = actions.update(active)
-        for action in changes.released {
+        for action in changes.released where action != .command {
             send(action, down: false)
             nextRepeat.removeValue(forKey: action)
         }
-        for action in changes.pressed {
+        if changes.released.contains(.command) { send(.command, down: false) }
+        if changes.pressed.contains(.command) { send(.command, down: true) }
+        for action in changes.pressed where action != .command {
             send(action, down: true)
             if action.repeats { nextRepeat[action] = now + 0.4 }
         }
@@ -274,8 +279,9 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func send(_ action: RemoteAction, down: Bool, repeating: Bool = false) {
         if let key = action.keyCode {
+            if action == .command { commandHeld = down }
             let event = CGEvent(keyboardEventSource: eventSource, virtualKey: key, keyDown: down)
-            event?.flags = action == .fn && down ? .maskSecondaryFn : []
+            event?.flags = keyboardFlags(for: action, down: down, commandHeld: commandHeld)
             event?.setIntegerValueField(.keyboardEventAutorepeat, value: repeating ? 1 : 0)
             event?.post(tap: .cghidEventTap)
         } else if action == .leftClick || action == .rightClick {
@@ -305,7 +311,8 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func releaseAll() {
         let changes = actions.update([])
-        for action in changes.released { send(action, down: false) }
+        for action in changes.released where action != .command { send(action, down: false) }
+        if changes.released.contains(.command) { send(.command, down: false) }
         nextRepeat.removeAll()
         scrollRemainder = .zero
     }

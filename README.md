@@ -15,15 +15,16 @@ Open **Couch Remote** from Applications or Spotlight. On first launch, enable it
 | LB / RB | A / D |
 | D-pad up / down | System volume up / down |
 | D-pad left / right | G / H |
-| Press left stick | Fn / Globe key |
+| Press left stick | Hold Command; release to select an app in the switcher |
+| Press right stick | Tab; click repeatedly while holding left stick to cycle apps |
 | LT | Hold for slow, precise pointer movement |
-| RT | Left click; hold to drag |
+| RT | Fn / Globe key |
 | Select / View | Escape |
 | Start / Menu | Pause or resume the remote |
 
 Button assignments and pointer speed can be changed in the controls window and are saved automatically. “Open automatically when I log in” is optional. A disconnected controller reconnects automatically while the app is open. Quit from the menu-bar icon to stop it entirely.
 
-System volume controls behave like the Mac’s own volume keys. Some HDMI televisions manage volume only on the TV; the G/H assignments still send those keys to your active app. The Fn action follows the behavior selected for the Globe key in macOS Keyboard settings.
+System volume controls behave like the Mac’s own volume keys. Some HDMI televisions manage volume only on the TV; the G/H assignments still send those keys to your active app. The Fn action follows the behavior selected for the Globe key in macOS Keyboard settings. Holding left-stick click and clicking right-stick click opens the macOS app switcher (Command–Tab); release the left-stick click to choose the highlighted app.
 
 ## Build
 

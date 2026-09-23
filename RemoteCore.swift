@@ -1,7 +1,7 @@
 import AppKit
 
 enum RemoteAction: String, CaseIterable {
-    case leftClick, rightClick, space, enter, escape, fn, g, h, a, d, volumeUp, volumeDown
+    case leftClick, rightClick, space, enter, escape, fn, command, g, h, a, d, volumeUp, volumeDown
     case precision, pause, none, tab, backspace, leftArrow, rightArrow, upArrow, downArrow, f, m
 
     var title: String {
@@ -12,6 +12,7 @@ enum RemoteAction: String, CaseIterable {
         case .enter: return "Return / Enter"
         case .escape: return "Escape"
         case .fn: return "Fn / Globe"
+        case .command: return "Command (hold to switch apps)"
         case .g: return "G"
         case .h: return "H"
         case .a: return "A"
@@ -38,6 +39,7 @@ enum RemoteAction: String, CaseIterable {
         case .enter: return 36
         case .escape: return 53
         case .fn: return 63
+        case .command: return 55
         case .g: return 5
         case .h: return 4
         case .a: return 0
@@ -80,9 +82,10 @@ let bindings: [Binding] = [
     Binding(input: "down", title: "D-pad down", initial: .volumeDown),
     Binding(input: "left", title: "D-pad left", initial: .g),
     Binding(input: "right", title: "D-pad right", initial: .h),
-    Binding(input: "leftStick", title: "Press left stick", initial: .fn),
+    Binding(input: "leftStick", title: "Press left stick", initial: .command),
+    Binding(input: "rightStick", title: "Press right stick", initial: .tab),
     Binding(input: "lt", title: "LT · left trigger", initial: .precision),
-    Binding(input: "rt", title: "RT · right trigger", initial: .leftClick),
+    Binding(input: "rt", title: "RT · right trigger", initial: .fn),
     Binding(input: "options", title: "Select / View", initial: .escape),
     Binding(input: "menu", title: "Start / Menu", initial: .pause),
 ]
@@ -117,6 +120,12 @@ struct ActionState {
     }
 }
 
+func keyboardFlags(for action: RemoteAction, down: Bool, commandHeld: Bool) -> CGEventFlags {
+    var flags: CGEventFlags = commandHeld ? .maskCommand : []
+    if action == .fn && down { flags.insert(.maskSecondaryFn) }
+    return flags
+}
+
 func runSelfTests() {
     precondition(stickVelocity(x: 0.1, y: -0.1) == .zero)
     precondition(stickVelocity(x: 1, y: 0) == CGPoint(x: 1, y: 0))
@@ -131,11 +140,16 @@ func runSelfTests() {
     precondition(state.update([.leftClick]).pressed == [.leftClick])
     precondition(state.update([.leftClick]).released.isEmpty)
     precondition(state.update([]).released == [.leftClick])
-    precondition(!RemoteAction.space.repeats && RemoteAction.volumeUp.repeats)
+    precondition(!RemoteAction.space.repeats && !RemoteAction.command.repeats && RemoteAction.volumeUp.repeats)
     precondition(Set(bindings.map(\.input)).count == bindings.count)
-    precondition(bindings.first(where: { $0.input == "leftStick" })?.initial == .fn)
+    precondition(bindings.first(where: { $0.input == "leftStick" })?.initial == .command)
+    precondition(bindings.first(where: { $0.input == "rightStick" })?.initial == .tab)
+    precondition(bindings.first(where: { $0.input == "rt" })?.initial == .fn)
     precondition(bindings.first(where: { $0.input == "lb" })?.initial == .a)
     precondition(bindings.first(where: { $0.input == "left" })?.initial == .g)
+    precondition(keyboardFlags(for: .tab, down: true, commandHeld: true).contains(.maskCommand))
+    precondition(keyboardFlags(for: .tab, down: false, commandHeld: true).contains(.maskCommand))
+    precondition(!keyboardFlags(for: .command, down: false, commandHeld: false).contains(.maskCommand))
     for action in RemoteAction.allCases {
         if let keyCode = action.keyCode {
             precondition(CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) != nil)
