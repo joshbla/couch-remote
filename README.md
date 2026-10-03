@@ -26,6 +26,21 @@ Button assignments and pointer speed can be changed in the controls window and a
 
 System volume controls behave like the Mac’s own volume keys. Some HDMI televisions manage volume only on the TV; the G/H assignments still send those keys to your active app. The Fn action follows the behavior selected for the Globe key in macOS Keyboard settings. Holding left-stick click and clicking right-stick click opens the macOS app switcher (Command–Tab); release the left-stick click to choose the highlighted app.
 
+## Troubleshooting controller detection
+
+If Bluetooth shows the controller connected but Couch Remote cannot detect it, inspect the logs for `GameControllerConfigService`. A confirmed failure was a stale controller-profile reference: the helper logged `Error loading device personality`, `No such file or directory`, and a matching `com.8BitDo.Ultimate2WirelessController.BLE` definition without a compatible personality.
+
+For that specific failure, restarting the configuration helper and then the controller daemon restored detection without rebooting:
+
+```sh
+sudo killall -KILL GameControllerConfigService
+sudo killall -TERM gamecontrollerd
+```
+
+macOS restarts these services automatically. Quit and reopen Couch Remote afterward. Verify a fresh `$TMPDIR/couch-remote-status.json` reports `connected`, `accessibility`, and `enabled` as `true`, then move a stick or press a button to confirm live input. Restarting the controller daemon alone did not fix the stale configuration helper.
+
+The [controller-detection runbook](docs/controller-detection.md) preserves the diagnostic evidence, unsuccessful attempts, and verification procedure. Recurrence prevention is queued in [TODO.md](TODO.md); the service restart above is the confirmed manual recovery.
+
 ## Build
 
 Requires the Apple command-line developer tools and Node with TypeScript support. Run `node build.ts` from this directory. The build reads `.env.local`, compiles the native Swift app, generates its icon, signs it locally, and runs the non-interactive core checks. The result is `build/Couch Remote.app`; `node build.ts --install` installs it in the main `/Applications` folder.
