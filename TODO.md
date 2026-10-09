@@ -17,11 +17,10 @@ Completion requires verification of the confirmed failure scenario, normal
 Bluetooth reconnects, live stick/button input, and Accessibility permission.
 The successful manual service restart is recovery evidence, not a permanent fix.
 
-## Verify the stable-signing update with the controller
+## Confirm Accessibility approval survives a rebuild
 
-The update with right-stick arrow keys, change-only status writes, and the new
-"Couch Remote Local Signing" certificate is installed. Changing from ad-hoc to
-certificate signing requires one final Accessibility re-approval, which the user
-will grant. Next: confirm live status reports `accessibility: true`, sideways
-right-stick movement sends arrow keys, vertical movement still scrolls, and that
-approval survives the next rebuild and reinstall without another reset.
+The app is now signed with the "Couch Remote Local Signing" certificate, and the
+user re-approved Accessibility once after the switch from ad-hoc signing. Right-
+stick arrows and scrolling were confirmed by the user. Next: on the next rebuild
+and reinstall, verify live status still reports `accessibility: true` without a
+reset or re-approval.
