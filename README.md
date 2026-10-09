@@ -7,7 +7,8 @@ Open **Couch Remote** from Applications or Spotlight. On first launch, enable it
 | Controller | Action |
 | --- | --- |
 | Left stick | Move the pointer |
-| Right stick | Scroll |
+| Right stick up / down | Scroll vertically |
+| Right stick left / right | Left / Right arrow keys; hold to repeat |
 | A (bottom face button) | Left click; hold to drag |
 | B (right face button) | Right click |
 | X (left face button) | Space |
@@ -23,6 +24,8 @@ Open **Couch Remote** from Applications or Spotlight. On first launch, enable it
 | Start / Menu | Pause or resume the remote |
 
 Button assignments and pointer speed can be changed in the controls window and are saved automatically. “Open automatically when I log in” is optional. A disconnected controller reconnects automatically while the app is open. Quit from the menu-bar icon to stop it entirely.
+
+The right stick uses its dominant direction: mostly vertical movement scrolls, while mostly horizontal movement sends arrow keys. Returning to center or switching to vertical movement releases the arrow key.
 
 System volume controls behave like the Mac’s own volume keys. Some HDMI televisions manage volume only on the TV; the G/H assignments still send those keys to your active app. The Fn action follows the behavior selected for the Globe key in macOS Keyboard settings. Holding left-stick click and clicking right-stick click opens the macOS app switcher (Command–Tab); release the left-stick click to choose the highlighted app.
 

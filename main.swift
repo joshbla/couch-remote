@@ -25,7 +25,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var trusted = false
     private var lastTick = ProcessInfo.processInfo.systemUptime
     private var lastStatusTick: TimeInterval = 0
-    private var scrollRemainder = CGPoint.zero
+    private var scrollRemainder: Double = 0
     private var screenRects: [CGRect] = []
     private var lastClick: TimeInterval = 0
     private var lastClickPoint = CGPoint.zero
@@ -116,7 +116,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let separator = NSBox()
         separator.boxType = .separator
         stack.addArrangedSubview(separator)
-        stack.addArrangedSubview(label("Left stick: move pointer     ·     Right stick: scroll", size: 14, weight: .semibold))
+        stack.addArrangedSubview(label("Left stick: pointer · Right stick: scroll up/down, arrows left/right", size: 14, weight: .semibold))
         stack.addArrangedSubview(label("Hold LT for precision. Hold A while moving to drag."))
         stack.addArrangedSubview(label("Hold left stick click, then click right stick to switch apps."))
         let speedRow = NSStackView()
@@ -225,7 +225,9 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         if newPresses.contains(where: { mappings[$0] == .pause }) { toggleEnabled() }
         guard enabled && trusted else { return }
-        let active = Set(current.compactMap { mappings[$0] }).subtracting([.pause, .none])
+        let rightStick = rightStickInput(x: Double(pad.rightThumbstick.xAxis.value), y: Double(pad.rightThumbstick.yAxis.value))
+        var active = Set(current.compactMap { mappings[$0] }).subtracting([.pause, .none])
+        if let arrow = rightStick.arrow { active.insert(arrow) }
         let changes = actions.update(active)
         for action in changes.released where action != .command {
             send(action, down: false)
@@ -249,18 +251,21 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
             movePointer(dx: velocity.x * pointerSpeed * multiplier * dt, dy: -velocity.y * pointerSpeed * multiplier * dt)
             if window.isVisible && newPresses.isEmpty { activityLabel.stringValue = "Receiving left stick · pointer moving" }
         }
-        let scroll = stickVelocity(x: Double(pad.rightThumbstick.xAxis.value), y: Double(pad.rightThumbstick.yAxis.value), deadZone: 0.2)
-        if scroll != .zero {
-            scrollRemainder.x += -scroll.x * 950 * dt
-            scrollRemainder.y += scroll.y * 950 * dt
-            let horizontal = Int32(scrollRemainder.x)
-            let vertical = Int32(scrollRemainder.y)
-            scrollRemainder.x -= Double(horizontal)
-            scrollRemainder.y -= Double(vertical)
-            if horizontal != 0 || vertical != 0 {
-                CGEvent(scrollWheelEvent2Source: eventSource, units: .pixel, wheelCount: 2, wheel1: vertical, wheel2: horizontal, wheel3: 0)?.post(tap: .cghidEventTap)
+        if rightStick.scroll != 0 {
+            scrollRemainder += rightStick.scroll * 950 * dt
+            let vertical = Int32(scrollRemainder)
+            scrollRemainder -= Double(vertical)
+            if vertical != 0 {
+                CGEvent(scrollWheelEvent2Source: eventSource, units: .pixel, wheelCount: 1, wheel1: vertical, wheel2: 0, wheel3: 0)?.post(tap: .cghidEventTap)
             }
-        } else { scrollRemainder = .zero }
+        } else { scrollRemainder = 0 }
+        if window.isVisible && newPresses.isEmpty {
+            if let arrow = rightStick.arrow {
+                activityLabel.stringValue = "Receiving right stick · \(arrow.title)"
+            } else if rightStick.scroll != 0 {
+                activityLabel.stringValue = "Receiving right stick · scrolling"
+            }
+        }
     }
 
     private func movePointer(dx: Double, dy: Double) {
@@ -314,7 +319,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         for action in changes.released where action != .command { send(action, down: false) }
         if changes.released.contains(.command) { send(.command, down: false) }
         nextRepeat.removeAll()
-        scrollRemainder = .zero
+        scrollRemainder = 0
     }
 
     private func refreshStatus() {

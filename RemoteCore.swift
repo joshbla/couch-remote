@@ -97,6 +97,15 @@ func stickVelocity(x: Double, y: Double, deadZone: Double = 0.16) -> CGPoint {
     return CGPoint(x: x / magnitude * strength, y: y / magnitude * strength)
 }
 
+/// Use the dominant axis so vertical scrolling cannot also send arrow keys.
+func rightStickInput(x: Double, y: Double) -> (arrow: RemoteAction?, scroll: Double) {
+    if abs(x) > abs(y) {
+        guard abs(x) > 0.2 else { return (nil, 0) }
+        return (x < 0 ? .leftArrow : .rightArrow, 0)
+    }
+    return (nil, stickVelocity(x: 0, y: y, deadZone: 0.2).y)
+}
+
 func nearestVisiblePoint(_ point: CGPoint, screens: [CGRect]) -> CGPoint {
     guard !screens.isEmpty else { return point }
     if screens.contains(where: { $0.contains(point) }) { return point }
@@ -133,6 +142,17 @@ func runSelfTests() {
     precondition(abs(hypot(diagonal.x, diagonal.y) - 1) < 0.00001)
     let fine = stickVelocity(x: 0.25, y: 0)
     precondition(fine.x > 0 && fine.x < 0.1)
+    precondition(rightStickInput(x: 0.15, y: -0.15) == (nil, 0))
+    precondition(rightStickInput(x: -1, y: 0.3) == (.leftArrow, 0))
+    precondition(rightStickInput(x: 1, y: -0.3) == (.rightArrow, 0))
+    precondition(rightStickInput(x: 0.3, y: 1) == (nil, 1))
+    precondition(rightStickInput(x: -0.3, y: -1) == (nil, -1))
+    precondition(rightStickInput(x: 0.6, y: 0.6).arrow == nil)
+    var stickState = ActionState()
+    precondition(stickState.update([rightStickInput(x: -1, y: 0).arrow!]).pressed == [.leftArrow])
+    let reverse = stickState.update([rightStickInput(x: 1, y: 0).arrow!])
+    precondition(reverse.released == [.leftArrow] && reverse.pressed == [.rightArrow])
+    precondition(stickState.update(Set([rightStickInput(x: 0, y: 1).arrow].compactMap { $0 })).released == [.rightArrow])
     let screens = [CGRect(x: 0, y: 0, width: 100, height: 100), CGRect(x: -100, y: 0, width: 100, height: 100)]
     precondition(nearestVisiblePoint(CGPoint(x: -50, y: 30), screens: screens) == CGPoint(x: -50, y: 30))
     precondition(nearestVisiblePoint(CGPoint(x: 150, y: 130), screens: screens) == CGPoint(x: 99, y: 99))
@@ -155,5 +175,5 @@ func runSelfTests() {
             precondition(CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) != nil)
         }
     }
-    print("Passed: dead zone, precision curve, diagonal speed, multiple displays, action ownership, release cleanup, repeat policy, bindings, keyboard events.")
+    print("Passed: dead zone, precision curve, diagonal speed, right-stick arrows/scroll and direction release, multiple displays, action ownership, release cleanup, repeat policy, bindings, keyboard events.")
 }
