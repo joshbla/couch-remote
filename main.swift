@@ -25,6 +25,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var trusted = false
     private var lastTick = ProcessInfo.processInfo.systemUptime
     private var lastStatusTick: TimeInterval = 0
+    private var lastStatusData: Data?
     private var scrollRemainder: Double = 0
     private var screenRects: [CGRect] = []
     private var lastClick: TimeInterval = 0
@@ -340,9 +341,9 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusItem.button?.toolTip = connectionLabel.stringValue
         // Small local status snapshot for troubleshooting without collecting key contents.
         let status: [String: Any] = ["connected": controller != nil, "accessibility": trusted, "enabled": enabled, "buttonPresses": inputCount, "lastInput": activityLabel.stringValue]
-        if let data = try? JSONSerialization.data(withJSONObject: status, options: [.prettyPrinted, .sortedKeys]) {
+        if let data = try? JSONSerialization.data(withJSONObject: status, options: [.prettyPrinted, .sortedKeys]), data != lastStatusData {
             let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("couch-remote-status.json")
-            try? data.write(to: url, options: .atomic)
+            if (try? data.write(to: url, options: .atomic)) != nil { lastStatusData = data }
         }
     }
 

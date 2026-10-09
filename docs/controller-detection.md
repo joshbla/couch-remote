@@ -61,7 +61,10 @@ has not been established. Long uptime alone is not a diagnosis.
 
    Inspect that JSON for `connected`, `accessibility`, `enabled`, `buttonPresses`,
    and `lastInput`. A stopped app leaves an old file behind; an old snapshot is
-   not evidence of the current connection or permissions.
+   not evidence of the current connection or permissions. The app rewrites the
+   file only when a reported value changes, so an old modification time alone
+   does not mean the app has stopped: confirm the process exists, then press a
+   controller button and check that the file updates within about a second.
 
 2. Check whether the controller exists below the GameController framework:
 
@@ -106,7 +109,7 @@ is still terminating can leave no running app and a stale status file.
 
 Verify all of the following before reporting success:
 
-- The app has a live process and the status file is being updated.
+- The app has a live process and the status file updates after a controller input.
 - `connected`, `accessibility`, and `enabled` are all `true`.
 - Moving the left stick produces `Receiving left stick · pointer moving`.
 - A button press increments `buttonPresses` and updates `lastInput`.
