@@ -17,16 +17,11 @@ Completion requires verification of the confirmed failure scenario, normal
 Bluetooth reconnects, live stick/button input, and Accessibility permission.
 The successful manual service restart is recovery evidence, not a permanent fix.
 
-## Fix excessive temp-file writes from status refresh
+## Verify the stable-signing update with the controller
 
-While diagnosing a controller-detection failure, macOS filed a microstackshot
-(`CouchRemote_*.diag`, action: none) reporting that CouchRemote wrote ~2 GB of
-file-backed memory over ~22 hours and exceeded the system's disk-write limit
-(~24.86 KB/s over 86400s).
-
-Cause: `refreshStatus()` runs about once per second from `tick()` and rewrites
-`$TMPDIR/couch-remote-status.json` with `.atomic` on every call, including when
-none of the reported values have changed.
-
-Next step: only write the snapshot when the payload actually changes (or throttle
-to a much longer interval), so the app is not writing to disk continuously.
+The update with right-stick arrow keys, change-only status writes, and the new
+"Couch Remote Local Signing" certificate is installed. Changing from ad-hoc to
+certificate signing requires one final Accessibility re-approval, which the user
+will grant. Next: confirm live status reports `accessibility: true`, sideways
+right-stick movement sends arrow keys, vertical movement still scrolls, and that
+approval survives the next rebuild and reinstall without another reset.

@@ -3,6 +3,7 @@ import { copyFileSync, cpSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnvFile } from "node:process";
+import { signingIdentity } from "./signing.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
 loadEnvFile(join(root, ".env.local"));
@@ -14,7 +15,7 @@ copyFileSync(join(root, "Info.plist"), join(contents, "Info.plist"));
 const binary = join(contents, "MacOS", "CouchRemote");
 execFileSync("xcrun", ["swiftc", "-O", "-swift-version", "5", "-framework", "AppKit", "-framework", "GameController", "-framework", "ServiceManagement", join(root, "RemoteCore.swift"), join(root, "main.swift"), "-o", binary], { stdio: "inherit" });
 execFileSync(binary, ["--make-icon", join(contents, "Resources", "AppIcon.icns")], { stdio: "inherit" });
-execFileSync("codesign", ["--force", "--sign", "-", "--identifier", "local.josh.couchremote", app], { stdio: "inherit" });
+execFileSync("codesign", ["--force", "--sign", signingIdentity, "--identifier", "local.josh.couchremote", app], { stdio: "inherit" });
 execFileSync(binary, ["--self-test"], { stdio: "inherit" });
 console.log(`Built ${app}`);
 if (process.argv.includes("--install")) {
