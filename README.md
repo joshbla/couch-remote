@@ -18,7 +18,7 @@ Open **Couch Remote** from Applications or Spotlight. On first launch, enable it
 | D-pad left / right | G / H |
 | Press left stick | Hold Command; release to select an app in the switcher |
 | Press right stick | Tab; click repeatedly while holding left stick to cycle apps |
-| LT | Hold for slow, precise pointer movement |
+| LT | Tap to toggle slow, precise pointer movement; tap again to return to normal speed |
 | RT | Fn / Globe key |
 | Select / View | Escape |
 | Start / Menu | Pause or resume the remote |

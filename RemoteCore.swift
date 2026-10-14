@@ -19,7 +19,7 @@ enum RemoteAction: String, CaseIterable {
         case .d: return "D"
         case .volumeUp: return "Volume up"
         case .volumeDown: return "Volume down"
-        case .precision: return "Slow pointer (hold)"
+        case .precision: return "Slow pointer (tap to toggle)"
         case .pause: return "Pause / resume remote"
         case .none: return "Unassigned"
         case .tab: return "Tab"

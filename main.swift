@@ -22,6 +22,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var popups: [NSPopUpButton] = []
     private var pressedInputs: Set<String> = []
     private var enabled = true
+    private var slowPointer = false
     private var trusted = false
     private var lastTick = ProcessInfo.processInfo.systemUptime
     private var lastStatusTick: TimeInterval = 0
@@ -118,7 +119,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         separator.boxType = .separator
         stack.addArrangedSubview(separator)
         stack.addArrangedSubview(label("Left stick: pointer · Right stick: scroll up/down, arrows left/right", size: 14, weight: .semibold))
-        stack.addArrangedSubview(label("Hold LT for precision. Hold A while moving to drag."))
+        stack.addArrangedSubview(label("Tap LT to toggle slow pointer. Hold A while moving to drag."))
         stack.addArrangedSubview(label("Hold left stick click, then click right stick to switch apps."))
         let speedRow = NSStackView()
         speedRow.orientation = .horizontal
@@ -175,6 +176,7 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         controller = connected.first(where: { $0.vendorName?.localizedCaseInsensitiveContains("8BitDo") == true })
         controller?.handlerQueue = .main
         pressedInputs.removeAll()
+        slowPointer = false
         refreshStatus()
     }
 
@@ -226,8 +228,12 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         if newPresses.contains(where: { mappings[$0] == .pause }) { toggleEnabled() }
         guard enabled && trusted else { return }
+        if newPresses.contains(where: { mappings[$0] == .precision }) {
+            slowPointer.toggle()
+            activityLabel.stringValue = slowPointer ? "Slow pointer on" : "Slow pointer off"
+        }
         let rightStick = rightStickInput(x: Double(pad.rightThumbstick.xAxis.value), y: Double(pad.rightThumbstick.yAxis.value))
-        var active = Set(current.compactMap { mappings[$0] }).subtracting([.pause, .none])
+        var active = Set(current.compactMap { mappings[$0] }).subtracting([.pause, .none, .precision])
         if let arrow = rightStick.arrow { active.insert(arrow) }
         let changes = actions.update(active)
         for action in changes.released where action != .command {
@@ -248,9 +254,9 @@ final class RemoteApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         let velocity = stickVelocity(x: Double(pad.leftThumbstick.xAxis.value), y: Double(pad.leftThumbstick.yAxis.value))
         if velocity != .zero {
-            let multiplier = active.contains(.precision) ? 0.22 : 1.0
+            let multiplier = slowPointer ? 0.22 : 1.0
             movePointer(dx: velocity.x * pointerSpeed * multiplier * dt, dy: -velocity.y * pointerSpeed * multiplier * dt)
-            if window.isVisible && newPresses.isEmpty { activityLabel.stringValue = "Receiving left stick · pointer moving" }
+            if window.isVisible && newPresses.isEmpty { activityLabel.stringValue = slowPointer ? "Receiving left stick · pointer moving slowly" : "Receiving left stick · pointer moving" }
         }
         if rightStick.scroll != 0 {
             scrollRemainder += rightStick.scroll * 950 * dt
