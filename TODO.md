@@ -16,11 +16,3 @@ framework cannot load, and make the supported recovery clear to the user.
 Completion requires verification of the confirmed failure scenario, normal
 Bluetooth reconnects, live stick/button input, and Accessibility permission.
 The successful manual service restart is recovery evidence, not a permanent fix.
-
-## Confirm Accessibility approval survives a rebuild
-
-The app is now signed with the "Couch Remote Local Signing" certificate, and the
-user re-approved Accessibility once after the switch from ad-hoc signing. Right-
-stick arrows and scrolling were confirmed by the user. Next: on the next rebuild
-and reinstall, verify live status still reports `accessibility: true` without a
-reset or re-approval.
